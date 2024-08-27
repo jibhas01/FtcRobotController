@@ -34,7 +34,7 @@ public class ArcadeDrive  extends LinearOpMode {
 
         while(opModeIsActive()){
             drive = gamepad1.left_stick_y * -1;
-            rutn = gamepad1.right_stick_x;
+            turn = gamepad1.right_stick_x;
             strafe = gamepad1.left_stick_x;
 
             frPower = drive - turn - strafe;

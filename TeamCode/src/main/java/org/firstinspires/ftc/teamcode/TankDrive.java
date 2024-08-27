@@ -26,6 +26,11 @@ public class TankDrive extends LinearOpMode {
         fr.setDirection(DcMotor.Direction.REVERSE);
         br.setDirection(DcMotor.Direction.REVERSE);
 
+        fr.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        br.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        fl.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        bl.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
         waitForStart();
 
         while(opModeIsActive()){
@@ -38,8 +43,12 @@ public class TankDrive extends LinearOpMode {
 
             double max = Math.max(Math.abs(rightsidePower), Math.abs(leftsidePower));
 
-            fl.setPower(leftsidePower/max);
-            bl.setPower(leftsidePower/max);
+            if(max > 1){
+                rightsidePower /= max;
+                leftsidePower /= max;
+            }
+            fl.setPower(leftsidePower);
+            bl.setPower(leftsidePower);
             fr.setPower(rightsidePower);
             br.setPower(rightsidePower);
 
