@@ -35,26 +35,26 @@ public class FirstAuto extends LinearOpMode {
 
         waitForStart();
 
-        // first move
+        // drive to fist target -- adjust the numbers
         move(1000, 1000, 0.5);
 
-        // first turn - 90 degrees left
-        move(0, 500, 0.5);
+        // turn - 90 degrees left -- adjust the numbers
+        move(-500, 500, 0.5);
 
-        // second move
+        // drive to second target -- adjust the numbers
         move(1000, 1000, 0.5);
 
-        // second turn - 45 degrees left
+        // turn - 45 degrees left -- adjust the numbers
         move(0, 250, 0.5);
 
-        // move to hit the ball to the goal
+        // drive to hit the ball -- adjust the numbers
         move(500, 500, 0.5);
 
-        // reverse everything to go back home
+        // reverse everything to go back home -- adjust the numbers
         move(-500, -500, 0.5);
-        move(0, -250, 0.5);
+        move(250, -250, 0.5);
         move(-1000, -1000, 0.5);
-        move(0, -500, 0.5);
+        move(500, -500, 0.5);
         move(-1000, -1000, 0.5);
 
     }

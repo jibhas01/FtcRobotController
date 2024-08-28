@@ -23,8 +23,8 @@ public class TankDrive extends LinearOpMode {
         double drive, turn;
         double rightsidePower, leftsidePower;
 
-        fr.setDirection(DcMotor.Direction.REVERSE);
-        br.setDirection(DcMotor.Direction.REVERSE);
+        fl.setDirection(DcMotor.Direction.REVERSE);
+        bl.setDirection(DcMotor.Direction.REVERSE);
 
         fr.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         br.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
