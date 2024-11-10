@@ -1,10 +1,5 @@
 package org.firstinspires.ftc.teamcode;
 
-import static org.firstinspires.ftc.teamcode.training.RobotValues.LEFTDIR;
-import static org.firstinspires.ftc.teamcode.training.RobotValues.LOGO_DIR;
-import static org.firstinspires.ftc.teamcode.training.RobotValues.RIGHTDIR;
-import static org.firstinspires.ftc.teamcode.training.RobotValues.USB_DIR;
-
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
