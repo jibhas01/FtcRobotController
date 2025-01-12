@@ -30,7 +30,7 @@ public class RangersRobot extends LinearOpMode {
     static double ki = 0.002;
     static double kd = 0.0002;
     static double f = 0.5;
-    double target = 0;
+    double armTarget = 0;
     double lastError = 0;
     ElapsedTime elapsedTime = new ElapsedTime();
     final double ticks_in_degrees = 537.7 / 360;
@@ -53,7 +53,7 @@ public class RangersRobot extends LinearOpMode {
 
             driveFieldXYW(gamepad1.left_stick_y, gamepad1.left_stick_x, gamepad1.right_stick_x);
 
-            moveArm(gamepad1.right_trigger, gamepad1.left_trigger);
+            moveArm(-gamepad2.left_stick_y, gamepad2.right_stick_y, gamepad2.left_trigger, gamepad2.right_trigger);
 
             //telemetry.addData("gamepad1.y: ", gamepad1.y);
             //telemetry.addData("previousGamePad1.y" , previousGamepad1.y);
@@ -78,22 +78,33 @@ public class RangersRobot extends LinearOpMode {
         }
     }
 
-    private void moveArm(double rTrigger, double lTrigger) {
+    /*
+     * a: to move the arm
+     * w: to more the wrist
+     * oc, cc: to open claw or close claw
+     */
+    private void moveArm(double a, double w, float oc, float cc) {
         int armPos = arm.getCurrentPosition();
-        if (rTrigger > 0) {
-            target = target + rTrigger + speedIncrementer;
-        }
-        if (lTrigger > 0){
-            target = target - lTrigger - speedIncrementer;
+        if (a > 0) {
+            armTarget = armTarget + a + speedIncrementer;
+        }else if(a < 0) {
+            armTarget = armTarget - a - speedIncrementer;
         }
 
-        if (target > maxArmPos){
-            target = maxArmPos;
+        if (armTarget > maxArmPos){
+            armTarget = maxArmPos;
         }
-        if (target < minArmPos){
-            target = minArmPos;
+        if (armTarget < minArmPos){
+            armTarget = minArmPos;
         }
-        arm.setPower(pidController(target, armPos));
+        telemetry.addData("a: ", a);
+        telemetry.addData("w: ", w);
+        telemetry.addData("oc: ", oc);
+        telemetry.addData("cc: ", cc);
+
+        arm.setPower(pidController(armTarget, armPos));
+
+        // Add code to move the wrist and claw using w, cl, and cr
     }
 
     public void init(HardwareMap hardwareMap) {
@@ -106,7 +117,6 @@ public class RangersRobot extends LinearOpMode {
         arm.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         wrist = hardwareMap.get(Servo.class,"wrist");
         claw = hardwareMap.get(Servo.class,"claw");
-        wrist.setDirection(Servo.Direction.REVERSE);
         initIMU(hardwareMap);
     }
 
