@@ -15,6 +15,7 @@ import com.qualcomm.robotcore.hardware.Gamepad;
 @TeleOp(name="Rangers Robot", group="Linear OpMode")
 public class RangersRobot extends LinearOpMode {
 
+    // Motors
     DcMotorEx lf;
     DcMotorEx rf;
     DcMotorEx lb;
@@ -24,7 +25,10 @@ public class RangersRobot extends LinearOpMode {
     Servo claw;
     IMU imu;
 
+    // IMU
     static double headingOffset = 0;
+
+    // PID
     double integralSum = 0;
     static double kp = 0.03;
     static double ki = 0;
@@ -34,13 +38,19 @@ public class RangersRobot extends LinearOpMode {
     double lastError = 0;
     ElapsedTime elapsedTime = new ElapsedTime();
     final double ticks_in_degrees = 537.7 / 360;
+
+    // Arm
     final double minArmPos = 0;
     final double maxArmPos = 320;
     double armSpeedInc = 0;
+
+    // Wrist
     double currentWristPos = 0.1;
     double maxWristPos = 0.7;
     double minWristPos = 0;
     double wristSpeedInc = 0.004;
+
+    // Claw
     double currentClawPos = 0.75;
     double maxClawPos = 0.78;
     double minClawPos = 0.65;
