@@ -40,12 +40,12 @@ public class RangersRobot extends LinearOpMode {
     final double ticks_in_degrees = 537.7 / 360;
 
     // Arm
-    final double minArmPos = 0;
-    final double maxArmPos = 320;
-    double armSpeedInc = 0;
+    final double minArmPos = 10;
+    final double maxArmPos = 1765;
+    double armSpeedInc = 2;
 
     // Wrist
-    double currentWristPos = 0.1;
+    double currentWristPos = 0.15;
     double maxWristPos = 0.7;
     double minWristPos = 0;
     double wristSpeedInc = 0.004;
@@ -64,7 +64,7 @@ public class RangersRobot extends LinearOpMode {
         rf = initDcMotor(hardwareMap, "fr", DcMotor.Direction.FORWARD);
         lb = initDcMotor(hardwareMap, "bl", DcMotor.Direction.REVERSE);
         rb = initDcMotor(hardwareMap, "br", DcMotor.Direction.FORWARD);
-        arm = initDcMotor(hardwareMap, "arm", DcMotor.Direction.FORWARD);
+        arm = initDcMotor(hardwareMap, "arm", DcMotor.Direction.REVERSE);
         arm.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         arm.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         wrist = hardwareMap.get(Servo.class,"wrist");
@@ -108,6 +108,13 @@ public class RangersRobot extends LinearOpMode {
             }else if(gamepad2.left_stick_x < 0 && currentWristPos > minWristPos){
                 currentWristPos -= wristSpeedInc;
             }
+
+            if(arm.getCurrentPosition() < 290 && currentWristPos > 0.15)
+                currentWristPos = 0.15;
+
+            if(arm.getCurrentPosition() > 1515 && currentWristPos < 0.48)
+                currentWristPos = 0.48;
+
             wrist.setPosition(currentWristPos);
 
             // Move the claw --- max open 0.65, max close 0.78
@@ -148,6 +155,17 @@ public class RangersRobot extends LinearOpMode {
         double rfPower = rx + ry + rw;
         double lbPower = rx + ry - rw;
         double rbPower = rx - ry + rw;
+
+        double maxPower = Math.max(Math.abs(lfPower),
+                Math.max(Math.abs(rfPower),
+                        Math.max(Math.abs(lbPower), Math.abs(rbPower))));
+
+        if(maxPower > 1){
+            lfPower /= maxPower;
+            rfPower /= maxPower;
+            lbPower /= maxPower;
+            rbPower /= maxPower;
+        }
 
         lf.setPower(lfPower);
         rf.setPower(rfPower);
