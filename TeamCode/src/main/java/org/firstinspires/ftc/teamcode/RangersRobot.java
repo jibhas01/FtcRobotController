@@ -41,12 +41,12 @@ public class RangersRobot extends LinearOpMode {
 
     // Arm
     final double minArmPos = 10;
-    final double maxArmPos = 1765;
-    double armSpeedInc = 2;
+    final double maxArmPos = 1840;
+    double armSpeedInc = 3;
 
     // Wrist
-    double currentWristPos = 0.15;
-    double maxWristPos = 0.7;
+    double currentWristPos = 0.29;
+    double maxWristPos = 0.9;
     double minWristPos = 0;
     double wristSpeedInc = 0.004;
 
@@ -109,12 +109,13 @@ public class RangersRobot extends LinearOpMode {
                 currentWristPos -= wristSpeedInc;
             }
 
-            if(arm.getCurrentPosition() < 290 && currentWristPos > 0.15)
-                currentWristPos = 0.15;
+            if(arm.getCurrentPosition() < 340 && currentWristPos > 0.34)
+                currentWristPos = 0.34;
 
-            if(arm.getCurrentPosition() > 1515 && currentWristPos < 0.48)
-                currentWristPos = 0.48;
+            if(arm.getCurrentPosition() > 1515 && currentWristPos < 0.63)
+                currentWristPos = 0.63;
 
+            telemetry.addData("currentWristPos ", currentWristPos);
             wrist.setPosition(currentWristPos);
 
             // Move the claw --- max open 0.65, max close 0.78
@@ -167,10 +168,10 @@ public class RangersRobot extends LinearOpMode {
             rbPower /= maxPower;
         }
 
-        lf.setPower(lfPower);
-        rf.setPower(rfPower);
-        lb.setPower(lbPower);
-        rb.setPower(rbPower);
+        lf.setPower(lfPower * 0.40);
+        rf.setPower(rfPower * 0.40);
+        lb.setPower(lbPower * 0.40);
+        rb.setPower(rbPower * 0.40);
     }
 
     public void driveFieldXYW(double fx, double fy, double fw) {

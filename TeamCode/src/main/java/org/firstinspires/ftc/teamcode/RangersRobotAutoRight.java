@@ -33,11 +33,11 @@ public class RangersRobotAutoRight  extends LinearOpMode {
     final double ticks_in_degrees = 537.7 / 360;
 
     // Wheels
-    double wheelTarget1 = 300;
-    double wheelTarget2 = -300;
-    double wheelTarget3 = 300;
-    double wheelTarget4 = -200;
-    double robotTolerance = 0.1;
+    int wheelTarget1 = -200;
+    int wheelTarget2 = 200;
+    int wheelTarget3 = -200;
+    int wheelTarget4 = 150;
+    double robotTolerance = 2;
     boolean doneRobotMove1 = false;
     boolean doneRobotMove2 = true;
     boolean doneRobotMove3 = true;
@@ -46,27 +46,29 @@ public class RangersRobotAutoRight  extends LinearOpMode {
     // Arm
     final double minArmPos = 10;
     final double maxArmPos = 1765;
-    double initialArmPos = 0;
+    double initialArmPos = 20;
     double armSpeedInc = 2;
-    double armTarget1 = 300;
-    double armTarget2 = 400;
-    double armTolerance = 0.1;
+    int armTarget1 = 500;
+    int armTarget2 = 15;
+    double armTolerance = 2;
     boolean doneArmMove1 = true;
     boolean doneArmMove2 = true;
     boolean doneArmMove3 = true;
 
     // Wrist
-    double initialWristPos = 0.15;
+    double initialWristPos = 0.25;
     double maxWristPos = 0.7;
     double minWristPos = 0;
     double wristSpeedInc = 0.004;
-    double wristTarget1 = 0.3;
-    double wristTarget2 = 0.5;
+    double wristTarget1 = 0.5;
+    double wristTarget2 = 0.4;
+    double wristTarget3 = 0.25;
     boolean doneWristMove1 = true;
     boolean doneWristMove2 = true;
+    boolean doneWristMove3 = true;
 
     // Claw
-    double initialClawPos = 0.75;
+    double initialClawPos = 0.77;
     double maxClawPos = 0.78;
     double minClawPos = 0.65;
     double clawSpeedInc = 0.004;
@@ -80,7 +82,7 @@ public class RangersRobotAutoRight  extends LinearOpMode {
         rb = initDcMotor(hardwareMap, "br", DcMotor.Direction.FORWARD);
         arm = initDcMotor(hardwareMap, "arm", DcMotor.Direction.REVERSE);
         arm.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        arm.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        arm.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         wrist = hardwareMap.get(Servo.class,"wrist");
         claw = hardwareMap.get(Servo.class,"claw");
         imu = hardwareMap.get(IMU.class, "imu");
@@ -89,27 +91,32 @@ public class RangersRobotAutoRight  extends LinearOpMode {
                         RevHubOrientationOnRobot.UsbFacingDirection.BACKWARD));
         imu.initialize(params);
 
-        arm.setPower(initialArmPos);
+        //arm.setPower(initialArmPos);
         wrist.setPosition(initialWristPos);
         claw.setPosition(initialClawPos);
+        double lfLastPos = lf.getCurrentPosition();
+
+        // telemetry.addData("lfLastPos: ", lfLastPos);
+        // telemetry.update();
 
         waitForStart();
 
         while (opModeIsActive()) {
-            double lfPos = lf.getCurrentPosition();
+            double lfCurrPos = lf.getCurrentPosition();
             // 1st robot move
             if(!doneRobotMove1) {
-                driveXYW(pidController(lfPos + wheelTarget1, lfPos), 0, 0);
-                if(Math.abs(wheelTarget1 - lf.getCurrentPosition()) < robotTolerance){
+                driveWithEncoders(wheelTarget1, 0, 0);
+                if(Math.abs(Math.abs(wheelTarget1) - Math.abs(lfCurrPos)) < robotTolerance){
                     doneRobotMove1 = true;
                     doneRobotMove2 = false;
+                    lfLastPos = lfCurrPos;
                 }
             }
 
             // 2nd robot move
             if(!doneRobotMove2) {
-                driveXYW(0, pidController(lfPos + wheelTarget2, lfPos), 0);
-                if(Math.abs(wheelTarget2 - lf.getCurrentPosition()) < robotTolerance){
+                driveWithEncoders(0, wheelTarget2, 0);
+                if(Math.abs(Math.abs(wheelTarget2) - Math.abs(lfCurrPos)) < robotTolerance){
                     doneRobotMove2 = true;
                     doneRobotMove3 = false;
                     doneArmMove1 = false;
@@ -119,25 +126,28 @@ public class RangersRobotAutoRight  extends LinearOpMode {
 
             // 3rd robot move
             if(!doneRobotMove3) {
-                driveXYW(pidController(lfPos + wheelTarget3, lfPos), 0, 0);
-                if(Math.abs(wheelTarget3 - lf.getCurrentPosition()) < 0.1){
+                driveWithEncoders(wheelTarget3, 0, 0);
+                if(Math.abs(Math.abs(wheelTarget3) - Math.abs(lfCurrPos)) < robotTolerance){
                     doneRobotMove3 = true;
-                    doneArmMove2 = false;
                     doneWristMove2 = false;
                 }
             }
 
             // 4th robot move
             if(!doneRobotMove4) {
-                driveXYW(pidController(lfPos + wheelTarget4, lfPos), 0, 0);
-                if(Math.abs(wheelTarget4 - lf.getCurrentPosition()) < 0.1){
+                driveWithEncoders(wheelTarget4, 0, 0);
+                if(Math.abs(Math.abs(wheelTarget4) - Math.abs(lfCurrPos)) < robotTolerance){
                     doneRobotMove4 = true;
+                    doneWristMove3 = false;
                 }
             }
 
             // 1st arm move
+            //moveArmWithPID(initialArmPos);
             if(!doneArmMove1){
-                arm.setPower(pidController(armTarget1, arm.getCurrentPosition()));
+                //initialArmPos = armTarget1;
+                moveArmWithEncoders(armTarget1);
+                //moveArmWithPID(armTarget1);
                 if(Math.abs(armTarget1 - arm.getCurrentPosition()) < armTolerance){
                     doneArmMove1 = true;
                 }
@@ -145,7 +155,9 @@ public class RangersRobotAutoRight  extends LinearOpMode {
 
             // 2nd arm move
             if(!doneArmMove2){
-                arm.setPower(pidController(armTarget2, arm.getCurrentPosition()));
+                //initialArmPos = armTarget2;
+                moveArmWithEncoders(armTarget2);
+                //moveArmWithPID(armTarget2);
                 if(Math.abs(armTarget2 - arm.getCurrentPosition()) < armTolerance){
                     doneArmMove2 = true;
                 }
@@ -161,8 +173,26 @@ public class RangersRobotAutoRight  extends LinearOpMode {
             if(!doneWristMove2){
                 wrist.setPosition(wristTarget2);
                 doneWristMove2 = true;
+                doneRobotMove4 = false;
             }
 
+            // 3rd wrist move
+            if(!doneWristMove3){
+                wrist.setPosition(wristTarget3);
+                doneWristMove3 = true;
+                doneArmMove2 = false;
+            }
+
+            telemetry.addData("lf pos: ", lfCurrPos);
+            telemetry.addData("tolerance: ", Math.abs(wheelTarget1 - lfCurrPos));
+            telemetry.addData("armTolerance: ", Math.abs(armTarget2 - arm.getCurrentPosition()));
+            telemetry.addData("doneRobotMove1: ", doneRobotMove1);
+            telemetry.addData("doneRobotMove2: ", doneRobotMove2);
+            telemetry.addData("doneRobotMove3: ", doneRobotMove3);
+            telemetry.addData("doneRobotMove4: ", doneRobotMove4);
+            telemetry.addData("doneArmMove1: ", doneArmMove1);
+            telemetry.addData("doneWristMove1: ", doneWristMove1);
+            telemetry.update();
         }
     }
 
@@ -212,8 +242,59 @@ public class RangersRobotAutoRight  extends LinearOpMode {
         telemetry.addData("pid: ", pid);
         telemetry.addData("ff: ", ff);
         telemetry.addData("target: ", target);
-        telemetry.addData("armPos", state);
+        telemetry.addData("currPos: ", state);
 
         return pid + ff;
+    }
+
+    public void driveWithEncoders(int rx, int ry, int rw){
+        lf.setTargetPosition(rx - ry - rw);
+        rf.setTargetPosition(rx + ry + rw);
+        lb.setTargetPosition(rx + ry - rw);
+        rb.setTargetPosition(rx - ry + rw);
+
+        lf.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        lb.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        rf.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        rb.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+        lf.setPower(0.5);
+        lb.setPower(0.5);
+        rf.setPower(0.5);
+        rb.setPower(0.5);
+
+        while (opModeIsActive() && (lf.isBusy() || lb.isBusy() || rf.isBusy() || rb.isBusy())) {
+            idle();
+        }
+    }
+
+    public void moveArmWithEncoders(int target){
+        arm.setTargetPosition(target);
+        arm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        arm.setPower(0.3);
+
+        while (opModeIsActive() && arm.isBusy()) {
+            idle();
+        }
+    }
+
+    public double moveArmWithPID(double target){
+        double currentPos = arm.getCurrentPosition();
+        double myTarget = 0;
+        if (target > currentPos) {
+            myTarget = currentPos + armSpeedInc;
+        }
+        if(target < currentPos) {
+            myTarget = currentPos - armSpeedInc;
+        }
+        if (myTarget > maxArmPos){
+            myTarget = maxArmPos;
+        }
+        if (myTarget < minArmPos){
+            myTarget = minArmPos;
+        }
+        arm.setPower(pidController(myTarget, currentPos));
+
+        return currentPos;
     }
 }
