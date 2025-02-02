@@ -34,7 +34,7 @@ public class RangersRobot extends LinearOpMode {
     static double ki = 0;
     static double kd = 0.0003;
     static double f = 0;
-    double armTarget = 0;
+    double armTarget = 10;
     double lastError = 0;
     ElapsedTime elapsedTime = new ElapsedTime();
     final double ticks_in_degrees = 537.7 / 360;
@@ -109,11 +109,11 @@ public class RangersRobot extends LinearOpMode {
                 currentWristPos -= wristSpeedInc;
             }
 
-            if(arm.getCurrentPosition() < 340 && currentWristPos > 0.34)
-                currentWristPos = 0.34;
-
-            if(arm.getCurrentPosition() > 1515 && currentWristPos < 0.63)
-                currentWristPos = 0.63;
+//            if(arm.getCurrentPosition() < 340 && currentWristPos > 0.34)
+//                currentWristPos = 0.34;
+//
+//            if(arm.getCurrentPosition() > 1515 && currentWristPos < 0.63)
+//                currentWristPos = 0.63;
 
             telemetry.addData("currentWristPos ", currentWristPos);
             wrist.setPosition(currentWristPos);

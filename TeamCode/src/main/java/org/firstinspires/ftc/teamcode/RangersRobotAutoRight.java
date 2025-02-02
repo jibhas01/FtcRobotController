@@ -24,17 +24,17 @@ public class RangersRobotAutoRight  extends LinearOpMode {
 
     // PID
     double integralSum = 0;
-    static double kp = 0.03;
+    static double kp = 0.017;
     static double ki = 0;
-    static double kd = 0.0003;
+    static double kd = 0;
     static double f = 0;
     double lastError = 0;
     ElapsedTime elapsedTime = new ElapsedTime();
     final double ticks_in_degrees = 537.7 / 360;
 
     // Wheels
-    int wheelTarget1 = -200;
-    int wheelTarget2 = 200;
+    int wheelTarget1 = -50;
+    int wheelTarget2 = 1200;
     int wheelTarget3 = -200;
     int wheelTarget4 = 150;
     double robotTolerance = 2;
@@ -47,8 +47,8 @@ public class RangersRobotAutoRight  extends LinearOpMode {
     final double minArmPos = 10;
     final double maxArmPos = 1765;
     double initialArmPos = 20;
-    double armSpeedInc = 2;
-    int armTarget1 = 500;
+    double armSpeedInc = 4;
+    int armTarget1 = 460;
     int armTarget2 = 15;
     double armTolerance = 2;
     boolean doneArmMove1 = true;
@@ -56,11 +56,11 @@ public class RangersRobotAutoRight  extends LinearOpMode {
     boolean doneArmMove3 = true;
 
     // Wrist
-    double initialWristPos = 0.25;
+    double initialWristPos = 0;
     double maxWristPos = 0.7;
     double minWristPos = 0;
     double wristSpeedInc = 0.004;
-    double wristTarget1 = 0.5;
+    double wristTarget1 = 0.37;
     double wristTarget2 = 0.4;
     double wristTarget3 = 0.25;
     boolean doneWristMove1 = true;
@@ -95,6 +95,7 @@ public class RangersRobotAutoRight  extends LinearOpMode {
         wrist.setPosition(initialWristPos);
         claw.setPosition(initialClawPos);
         double lfLastPos = lf.getCurrentPosition();
+        double interimArmTarget = 0;
 
         // telemetry.addData("lfLastPos: ", lfLastPos);
         // telemetry.update();
@@ -103,89 +104,97 @@ public class RangersRobotAutoRight  extends LinearOpMode {
 
         while (opModeIsActive()) {
             double lfCurrPos = lf.getCurrentPosition();
+            double rfCurrPos = rf.getCurrentPosition();
+            double lbCurrPos = lb.getCurrentPosition();
+            double rbCurrPos = rb.getCurrentPosition();
             // 1st robot move
             if(!doneRobotMove1) {
                 driveWithEncoders(wheelTarget1, 0, 0);
-                if(Math.abs(Math.abs(wheelTarget1) - Math.abs(lfCurrPos)) < robotTolerance){
-                    doneRobotMove1 = true;
-                    doneRobotMove2 = false;
-                    lfLastPos = lfCurrPos;
-                }
+                //if(Math.abs(Math.abs(wheelTarget1) - Math.abs(lfCurrPos)) < robotTolerance){
+                doneRobotMove1 = true;
+                doneRobotMove2 = false;
+                lfLastPos = lfCurrPos;
+                //}
             }
 
             // 2nd robot move
             if(!doneRobotMove2) {
                 driveWithEncoders(0, wheelTarget2, 0);
-                if(Math.abs(Math.abs(wheelTarget2) - Math.abs(lfCurrPos)) < robotTolerance){
-                    doneRobotMove2 = true;
-                    doneRobotMove3 = false;
-                    doneArmMove1 = false;
-                    doneWristMove1 = false;
-                }
+                //if(Math.abs(Math.abs(wheelTarget2) - Math.abs(lfCurrPos)) < robotTolerance){
+                doneRobotMove2 = true;
+                doneRobotMove3 = false;
+                doneArmMove1 = false;
+                //}
             }
 
             // 3rd robot move
-            if(!doneRobotMove3) {
-                driveWithEncoders(wheelTarget3, 0, 0);
-                if(Math.abs(Math.abs(wheelTarget3) - Math.abs(lfCurrPos)) < robotTolerance){
-                    doneRobotMove3 = true;
-                    doneWristMove2 = false;
-                }
-            }
-
-            // 4th robot move
-            if(!doneRobotMove4) {
-                driveWithEncoders(wheelTarget4, 0, 0);
-                if(Math.abs(Math.abs(wheelTarget4) - Math.abs(lfCurrPos)) < robotTolerance){
-                    doneRobotMove4 = true;
-                    doneWristMove3 = false;
-                }
-            }
-
-            // 1st arm move
+//            if(!doneRobotMove3) {
+//                //driveWithEncoders(wheelTarget3, 0, 0);
+//                //if(Math.abs(Math.abs(wheelTarget3) - Math.abs(lfCurrPos)) < robotTolerance){
+//                    doneRobotMove3 = true;
+//                    doneWristMove2 = false;
+//                //}
+//            }
+//
+//            // 4th robot move
+//            if(!doneRobotMove4) {
+//                driveWithEncoders(wheelTarget4, 0, 0);
+//                if(Math.abs(Math.abs(wheelTarget4) - Math.abs(lfCurrPos)) < robotTolerance){
+//                    doneRobotMove4 = true;
+//                    doneWristMove3 = false;
+//                }
+//            }
+//
+//            // 1st arm move
             //moveArmWithPID(initialArmPos);
-            if(!doneArmMove1){
-                //initialArmPos = armTarget1;
-                moveArmWithEncoders(armTarget1);
-                //moveArmWithPID(armTarget1);
-                if(Math.abs(armTarget1 - arm.getCurrentPosition()) < armTolerance){
-                    doneArmMove1 = true;
-                }
-            }
+//            if(!doneArmMove1){
+//                //initialArmPos = armTarget1;
+//                //moveArmWithEncoders(armTarget1);
+//                //moveArmWithPID(armTarget1);
+//                interimArmTarget += armSpeedInc;
+//                if(interimArmTarget > armTarget1){
+//                    doneArmMove1 = true;
+//                    doneWristMove1 = false;
+//                }
+//            }
+//            arm.setPower(pidController(interimArmTarget, arm.getCurrentPosition()));
+//
+//            // 2nd arm move
+//            if(!doneArmMove2){
+//                //initialArmPos = armTarget2;
+//                moveArmWithEncoders(armTarget2);
+//                //moveArmWithPID(armTarget2);
+//                if(Math.abs(armTarget2 - arm.getCurrentPosition()) < armTolerance){
+//                    doneArmMove2 = true;
+//                }
+//            }
+//
+//            // 1st wrist move
+//            if(!doneWristMove1){
+//                wrist.setPosition(wristTarget1);
+//                doneWristMove1 = true;
+//            }
+//
+//            // 2nd wrist move
+//            if(!doneWristMove2){
+//                wrist.setPosition(wristTarget2);
+//                doneWristMove2 = true;
+//                doneRobotMove4 = false;
+//            }
+//
+//            // 3rd wrist move
+//            if(!doneWristMove3){
+//                wrist.setPosition(wristTarget3);
+//                doneWristMove3 = true;
+//                doneArmMove2 = false;
+//            }
 
-            // 2nd arm move
-            if(!doneArmMove2){
-                //initialArmPos = armTarget2;
-                moveArmWithEncoders(armTarget2);
-                //moveArmWithPID(armTarget2);
-                if(Math.abs(armTarget2 - arm.getCurrentPosition()) < armTolerance){
-                    doneArmMove2 = true;
-                }
-            }
-
-            // 1st wrist move
-            if(!doneWristMove1){
-                wrist.setPosition(wristTarget1);
-                doneWristMove1 = true;
-            }
-
-            // 2nd wrist move
-            if(!doneWristMove2){
-                wrist.setPosition(wristTarget2);
-                doneWristMove2 = true;
-                doneRobotMove4 = false;
-            }
-
-            // 3rd wrist move
-            if(!doneWristMove3){
-                wrist.setPosition(wristTarget3);
-                doneWristMove3 = true;
-                doneArmMove2 = false;
-            }
-
-            telemetry.addData("lf pos: ", lfCurrPos);
-            telemetry.addData("tolerance: ", Math.abs(wheelTarget1 - lfCurrPos));
-            telemetry.addData("armTolerance: ", Math.abs(armTarget2 - arm.getCurrentPosition()));
+//            telemetry.addData("lf pos: ", lfCurrPos);
+//            telemetry.addData("rf pos: ", rfCurrPos);
+//            telemetry.addData("lb pos: ", lbCurrPos);
+//            telemetry.addData("rb pos: ", rbCurrPos);
+//           telemetry.addData("tolerance: ", Math.abs(wheelTarget1 - lfCurrPos));
+//            telemetry.addData("armTolerance: ", Math.abs(armTarget2 - arm.getCurrentPosition()));
             telemetry.addData("doneRobotMove1: ", doneRobotMove1);
             telemetry.addData("doneRobotMove2: ", doneRobotMove2);
             telemetry.addData("doneRobotMove3: ", doneRobotMove3);
@@ -248,24 +257,29 @@ public class RangersRobotAutoRight  extends LinearOpMode {
     }
 
     public void driveWithEncoders(int rx, int ry, int rw){
-        lf.setTargetPosition(rx - ry - rw);
-        rf.setTargetPosition(rx + ry + rw);
-        lb.setTargetPosition(rx + ry - rw);
-        rb.setTargetPosition(rx - ry + rw);
+        lf.setTargetPosition(lf.getCurrentPosition() + rx - ry - rw);
+        rf.setTargetPosition(rf.getCurrentPosition() + rx + ry + rw);
+        lb.setTargetPosition(lb.getCurrentPosition() + rx + ry - rw);
+        rb.setTargetPosition(rb.getCurrentPosition() + rx - ry + rw);
 
         lf.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         lb.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         rf.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         rb.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
-        lf.setPower(0.5);
-        lb.setPower(0.5);
-        rf.setPower(0.5);
-        rb.setPower(0.5);
+        lf.setPower(0.2);
+        lb.setPower(0.2);
+        rf.setPower(0.2);
+        rb.setPower(0.2);
 
         while (opModeIsActive() && (lf.isBusy() || lb.isBusy() || rf.isBusy() || rb.isBusy())) {
             idle();
         }
+//        try {
+//            Thread.sleep(5000);
+//        } catch (InterruptedException e) {
+//            throw new RuntimeException(e);
+//        }
     }
 
     public void moveArmWithEncoders(int target){
@@ -278,23 +292,31 @@ public class RangersRobotAutoRight  extends LinearOpMode {
         }
     }
 
-    public double moveArmWithPID(double target){
-        double currentPos = arm.getCurrentPosition();
-        double myTarget = 0;
-        if (target > currentPos) {
-            myTarget = currentPos + armSpeedInc;
-        }
-        if(target < currentPos) {
-            myTarget = currentPos - armSpeedInc;
-        }
-        if (myTarget > maxArmPos){
-            myTarget = maxArmPos;
-        }
-        if (myTarget < minArmPos){
-            myTarget = minArmPos;
-        }
-        arm.setPower(pidController(myTarget, currentPos));
+//    public double moveArmWithPID(double target){
+//        double currentPos = arm.getCurrentPosition();
+//        double myTarget = 0;
+//        if (target > currentPos) {
+//            myTarget = currentPos + armSpeedInc;
+//        }
+//        if(target < currentPos) {
+//            myTarget = currentPos - armSpeedInc;
+//        }
+//        if (target > maxArmPos){
+//            target = maxArmPos;
+//        }
+//        if (target < minArmPos){
+//            target = minArmPos;
+//        }
+//        arm.setPower(pidController(target, currentPos));
+//
+//        return currentPos;
+//    }
 
-        return currentPos;
-    }
+//    460
+//    .37
+//    .782
+//
+//    640
+//    .506
+//    .782
 }
