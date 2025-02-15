@@ -60,7 +60,7 @@ public class RangersRobotAutoRight  extends LinearOpMode {
     double maxWristPos = 0.7;
     double minWristPos = 0;
     double wristSpeedInc = 0.004;
-    double wristTarget1 = 0.37;
+    double wristTarget1 = 0.284;
     double wristTarget2 = 0.4;
     double wristTarget3 = 0.25;
     boolean doneWristMove1 = true;
@@ -68,8 +68,8 @@ public class RangersRobotAutoRight  extends LinearOpMode {
     boolean doneWristMove3 = true;
 
     // Claw
-    double initialClawPos = 0.77;
-    double maxClawPos = 0.78;
+    double initialClawPos = 0.85;
+    double maxClawPos = 0.85;
     double minClawPos = 0.65;
     double clawSpeedInc = 0.004;
 
@@ -109,7 +109,7 @@ public class RangersRobotAutoRight  extends LinearOpMode {
             double rbCurrPos = rb.getCurrentPosition();
             // 1st robot move
             if(!doneRobotMove1) {
-                driveWithEncoders(wheelTarget1, 0, 0);
+                //driveWithEncoders(wheelTarget1, 0, 0);
                 //if(Math.abs(Math.abs(wheelTarget1) - Math.abs(lfCurrPos)) < robotTolerance){
                 doneRobotMove1 = true;
                 doneRobotMove2 = false;
@@ -124,6 +124,7 @@ public class RangersRobotAutoRight  extends LinearOpMode {
                 doneRobotMove2 = true;
                 doneRobotMove3 = false;
                 doneArmMove1 = false;
+                doneWristMove1 = false;
                 //}
             }
 
@@ -170,10 +171,10 @@ public class RangersRobotAutoRight  extends LinearOpMode {
 //            }
 //
 //            // 1st wrist move
-//            if(!doneWristMove1){
-//                wrist.setPosition(wristTarget1);
-//                doneWristMove1 = true;
-//            }
+            if(!doneWristMove1){
+                wrist.setPosition(wristTarget1);
+                doneWristMove1 = true;
+            }
 //
 //            // 2nd wrist move
 //            if(!doneWristMove2){
@@ -311,12 +312,4 @@ public class RangersRobotAutoRight  extends LinearOpMode {
 //
 //        return currentPos;
 //    }
-
-//    460
-//    .37
-//    .782
-//
-//    640
-//    .506
-//    .782
 }

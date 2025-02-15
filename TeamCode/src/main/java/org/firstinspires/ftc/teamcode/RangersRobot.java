@@ -30,9 +30,9 @@ public class RangersRobot extends LinearOpMode {
 
     // PID
     double integralSum = 0;
-    static double kp = 0.03;
+    static double kp = 0.02;
     static double ki = 0;
-    static double kd = 0.0003;
+    static double kd = 0;//0.0003;
     static double f = 0;
     double armTarget = 10;
     double lastError = 0;
@@ -41,20 +41,34 @@ public class RangersRobot extends LinearOpMode {
 
     // Arm
     final double minArmPos = 10;
-    final double maxArmPos = 1840;
-    double armSpeedInc = 3;
+    final double maxArmPos = 1195;
+    double armSpeedInc = 1;
+    double maxArmSpeed = 0.5;
+    double intakeArmTarget = 10;
+    double outtakeArmTarget = 450;
+    boolean intakeTargetActivated = false;
+    boolean outtakeTargetActivated = false;
+    boolean initialOuttakeFlag = true;
 
     // Wrist
-    double currentWristPos = 0.29;
+    double currentWristPos = 0;
     double maxWristPos = 0.9;
     double minWristPos = 0;
     double wristSpeedInc = 0.004;
+    double intakeWristTarget = 0.025;
+    double outtakeWristTarget = 0.5;
+    boolean intakeWristTargetActivated = false;
+    boolean outtakeWristTargetActivated = false;
 
     // Claw
-    double currentClawPos = 0.75;
-    double maxClawPos = 0.78;
+    double currentClawPos = 0.85;
+    double maxClawPos = 0.85;
     double minClawPos = 0.65;
     double clawSpeedInc = 0.004;
+    double intakeClawTarget = 0.735;
+    double outtakeClawTarget = 0.85;
+    boolean intakeClawTargetActivated = false;
+    boolean outtakeClawTargetActivated = false;
 
     @Override
     public void runOpMode() {
@@ -64,7 +78,7 @@ public class RangersRobot extends LinearOpMode {
         rf = initDcMotor(hardwareMap, "fr", DcMotor.Direction.FORWARD);
         lb = initDcMotor(hardwareMap, "bl", DcMotor.Direction.REVERSE);
         rb = initDcMotor(hardwareMap, "br", DcMotor.Direction.FORWARD);
-        arm = initDcMotor(hardwareMap, "arm", DcMotor.Direction.REVERSE);
+        arm = initDcMotor(hardwareMap, "arm", DcMotor.Direction.FORWARD);
         arm.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         arm.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         wrist = hardwareMap.get(Servo.class,"wrist");
@@ -77,12 +91,18 @@ public class RangersRobot extends LinearOpMode {
 
         Gamepad previousGamepad1 = new Gamepad();
         previousGamepad1.copy(gamepad1);
+        Gamepad previousGamepad2 = new Gamepad();
+        previousGamepad2.copy(gamepad2);
         telemetry.addData("Status", "Initialized");
         telemetry.update();
+        wrist.setPosition(currentWristPos);
+        claw.setPosition(currentClawPos);
 
         waitForStart();
 
         while (opModeIsActive()) {
+
+            double currArmPos = arm.getCurrentPosition();
 
             // Drive the robot
             driveXYW(gamepad1.left_stick_y, gamepad1.left_stick_x, gamepad1.right_stick_x);
@@ -100,20 +120,101 @@ public class RangersRobot extends LinearOpMode {
             if (armTarget < minArmPos){
                 armTarget = minArmPos;
             }
-            arm.setPower(pidController(armTarget, arm.getCurrentPosition()));
 
-            // Move the wrist --- 0.46 , 0.25
-            if(gamepad2.left_stick_x > 0 && currentWristPos < maxWristPos){
-                currentWristPos += wristSpeedInc;
-            }else if(gamepad2.left_stick_x < 0 && currentWristPos > minWristPos){
-                currentWristPos -= wristSpeedInc;
+            // go to intake position
+/*            if(gamepad2.a && !previousGamepad2.a){
+                intakeTargetActivated = true;
+                currentWristPos = intakeWristTarget;
+                currentClawPos = intakeClawTarget;
+                previousGamepad2.copy(gamepad2);
+            }
+            if(intakeTargetActivated){
+                double prevDiff = intakeArmTarget - armTarget;
+                if(currArmPos < intakeArmTarget)
+                    armTarget += armSpeedInc + 1;
+                else
+                    armTarget = armTarget - armSpeedInc - 1;
+
+                double currDiff = intakeArmTarget - armTarget;
+                if(prevDiff * currDiff <= 0 ) {
+                    intakeTargetActivated = false;
+                    initialOuttakeFlag = true;
+                }
             }
 
-//            if(arm.getCurrentPosition() < 340 && currentWristPos > 0.34)
-//                currentWristPos = 0.34;
+            // go to outtake position
+            if(gamepad2.b && !previousGamepad2.b){
+                outtakeTargetActivated = true;
+                //currentWristPos = outtakeWristTarget;
+                currentClawPos = outtakeClawTarget;
+                previousGamepad2.copy(gamepad2);
+            }
+            if(outtakeTargetActivated){
+                double prevDiff = outtakeArmTarget - armTarget;
+                if(currArmPos < outtakeArmTarget)
+                    armTarget = armTarget + armSpeedInc + 1;
+                else
+                    armTarget = armTarget - armSpeedInc - 1;
+
+                double currDiff = outtakeArmTarget - armTarget;
+                if(prevDiff * currDiff <= 0) {
+                    outtakeTargetActivated = false;
+                    currentWristPos = outtakeWristTarget;
+                }
+
+                if(initialOuttakeFlag && currArmPos <= 10) {
+                    armTarget = 60;
+                    claw.setPosition(currentClawPos);
+                    wrist.setPosition(currentWristPos - 0.01);
+                    sleep(200);
+                    arm.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+                    arm.setTargetPosition(60);
+                    arm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                    arm.setPower(0.5);
+                    while (arm.isBusy()) {
+                        telemetry.addData("Arm Position: ", currArmPos);
+                        telemetry.update();
+                    }
+                    arm.setPower(0.2); // hold the arm
+                    driveXYW(0.7, 0, 0);
+                    sleep(700);
+                    driveXYW(0, 0, 0);
+                    initialOuttakeFlag = false;
+                    arm.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+                    currArmPos = arm.getCurrentPosition();
+                }
+
+            }
+
+            if(!gamepad2.a) previousGamepad2.copy(gamepad2);
+            if(!gamepad2.b) previousGamepad2.copy(gamepad2);
+*/
+            arm.setPower(pidController(armTarget, currArmPos));
+
+            // Move the wrist
+//            double relativeWristPosForwards = 7.88 * 0.000001 * Math.pow(arm.getCurrentPosition(), 2)
+//                    + 0.00132 * arm.getCurrentPosition() + 0.2528;
+//            if(arm.getCurrentPosition() < 175 && (gamepad2.left_trigger > 0 || gamepad2.right_trigger > 0))
+//                currentWristPos = relativeWristPosForwards;
 //
-//            if(arm.getCurrentPosition() > 1515 && currentWristPos < 0.63)
-//                currentWristPos = 0.63;
+//            double relativeWristPosBackwards = 0.00264 * arm.getCurrentPosition() - 2.500;
+//
+//            if(arm.getCurrentPosition() > 1025 &&
+//                    (gamepad2.left_trigger > 0 || gamepad2.right_trigger > 0) &&
+//                    currentWristPos < relativeWristPosBackwards)// && currentWristPos < 0.621)
+//                currentWristPos = relativeWristPosBackwards;//0.621;
+
+            if(gamepad2.left_stick_y > 0 && currentWristPos < maxWristPos){
+                currentWristPos += wristSpeedInc;
+//                if(arm.getCurrentPosition() < 175 && currentWristPos > relativeWristPosForwards){
+//                    currentWristPos = relativeWristPosForwards;
+//                }
+            }else if(gamepad2.left_stick_y < 0 && currentWristPos > minWristPos){
+                currentWristPos -= wristSpeedInc;
+//                if(arm.getCurrentPosition() > 1025 && currentWristPos < relativeWristPosBackwards - 0.03){
+//                    currentWristPos = relativeWristPosBackwards - 0.03;
+//                }
+            }
 
             telemetry.addData("currentWristPos ", currentWristPos);
             wrist.setPosition(currentWristPos);
@@ -196,6 +297,11 @@ public class RangersRobot extends LinearOpMode {
         telemetry.addData("ff: ", ff);
         telemetry.addData("target: ", target);
         telemetry.addData("armPos", state);
+
+        double absPid = Math.abs(pid);
+        double pidSign = pid / absPid;
+
+        if(absPid > maxArmSpeed) pid = maxArmSpeed * pidSign;
 
         return pid + ff;
     }
