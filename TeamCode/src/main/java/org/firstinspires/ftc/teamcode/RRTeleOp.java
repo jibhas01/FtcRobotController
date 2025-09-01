@@ -95,8 +95,8 @@ public class RRTeleOp extends LinearOpMode {
         previousGamepad2.copy(gamepad2);
         telemetry.addData("Status", "Initialized");
         telemetry.update();
-        wrist.setPosition(currentWristPos);
-        claw.setPosition(currentClawPos);
+        //wrist.setPosition(currentWristPos);
+        //claw.setPosition(currentClawPos);
 
         waitForStart();
 
@@ -121,7 +121,7 @@ public class RRTeleOp extends LinearOpMode {
                 armTarget = minArmPos;
             }
 
-            arm.setPower(pidController(armTarget, currArmPos));
+            //arm.setPower(pidController(armTarget, currArmPos));
 
             // Move the wrist
             if(gamepad2.left_stick_y > 0 && currentWristPos < maxWristPos){
@@ -131,7 +131,7 @@ public class RRTeleOp extends LinearOpMode {
             }
 
             telemetry.addData("currentWristPos ", currentWristPos);
-            wrist.setPosition(currentWristPos);
+            //wrist.setPosition(currentWristPos);
 
             // Move the claw --- max open 0.65, max close 0.78
             if(gamepad2.right_stick_x > 0 && currentClawPos < maxClawPos){
@@ -139,7 +139,7 @@ public class RRTeleOp extends LinearOpMode {
             }else if(gamepad2.right_stick_x < 0 && currentClawPos > minClawPos){
                 currentClawPos -= clawSpeedInc;
             }
-            claw.setPosition(currentClawPos);
+            //claw.setPosition(currentClawPos);
 
             //** Reset the heading
             if (gamepad1.y && previousGamepad1.y) {
