@@ -29,7 +29,8 @@ public class WadoodCameraTeleop extends LinearOpMode {
     // Intake motor
     private DcMotor intake;
 
-
+    // Gate motor
+    Servo gate;
 
     // Shooter config (base values)
     private static final double DEFAULT_SHOOT_POWER = -0.9; // fallback when no tag
@@ -44,7 +45,9 @@ public class WadoodCameraTeleop extends LinearOpMode {
     private int startLeftTicks  = 0;
     private double currentShootPower = DEFAULT_SHOOT_POWER;
 
-
+    // Gate state. Adjust as needed
+    private double closeGate = 0; // default gate position should be closed.
+    private double openGate = 1;
 
     // ---- VISION / APRILTAG ----
     private AprilTagProcessor aprilTag;
@@ -69,7 +72,7 @@ public class WadoodCameraTeleop extends LinearOpMode {
 
         intake     = hardwareMap.get(DcMotor.class, "intake");
 
-
+        gate = hardwareMap.get(Servo.class,"gate");
 
         // Drive directions (typical mecanum; flip if needed)
         frontRight.setDirection(DcMotor.Direction.FORWARD);
@@ -111,6 +114,9 @@ public class WadoodCameraTeleop extends LinearOpMode {
 
         // ----- VISION / APRILTAG SETUP -----
         initAprilTag();
+
+        // ----- Init Gate -----
+        gate.setPosition(closeGate);
 
         telemetry.addLine("Wadood TeleOp + AprilTag ready");
         telemetry.update();
@@ -214,9 +220,12 @@ public class WadoodCameraTeleop extends LinearOpMode {
 
             if (feeding) {
                 // Auto-feed into shooter once shooters reached FEED_TICKS
+                gate.setPosition(openGate);
                 intakePower = FEED_POWER;
             } else {
                 // Manual control with triggers when not feeding
+                gate.setPosition(closeGate);
+
                 if (gamepad1.right_trigger > 0.1) {
                     intakePower = gamepad1.right_trigger;         // intake in
                 } else if (gamepad1.left_trigger > 0.1) {
